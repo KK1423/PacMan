@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>PacMan</title>
+        <link rel="stylesheet" type="text/css" href="css/default.css">
+    	<script src="jquery.min.js"></script>
+    	<script>
+/*0 - wall
+  1 - space
+  2 - altoid
+  3 - megaaltoid
+ -1 - impassable space
+  4 - Ghost spawn
+*/
+var defboard = [
+[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 3, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 0, 0, 0, 1,-1, 0, 0, 0, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 4, 4, 4,-1,-1,-1, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+[ 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0,-1,-1,-1,-1,-1,-1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0,-1,-1,-1,-1,-1,-1, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0],
+[ 0, 3, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 3, 0],
+[ 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0],
+[ 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+[ 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]];
+                /*W,A,S,D*/
+var keyStates = [false,false,false,false];
+var score = 0;
+var isHigh = false;
+function Tile(n){
+	this.type = n;
+}
+var mintCount = 0;
+var board = [];
+for(var x=0;x<31;x++){
+	board[x] = [];
+	for(var y = 0;y<28;y++){
+    	board[x][y] = new Tile(defboard[x][y]);
+        if(defboard[x][y]===2)mintCount++;
+    }
+}
+function Sprite(x,y,t){
+    this.state=false;
+    this.x=x;
+    this.y=y;
+    this.t=t;
+    $("#0A0").append("<div style='position:absolute;width:23px;height:22px;overflow:hidden' ><img src='Sprites/pacmanthumb.png' style='position:absolute;left:-"+x.toString()+"px;top:-"+y.toString()+"px'></img></div>");
+    this.jQobj = $("div img").last();
+    this.toggleSprite= function(){
+        this.state = this.state?false:true;
+        this.jQobj.last().css("left","-"+(this.state?(this.x):(this.x+this.t)).toString()+"px");
+        setTimeout(this.toggleSprite.bind(this),90);
+    };
+    this.toggleSprite();
+    this.updateState = function(){
+        this.jQobj.css("left","-"+this.x.toString()+"px");
+        this.jQobj.css("top","-"+this.y.toString()+"px");
+    };
+    this.movTo= function(x,y,a,f,t){
+        if(a){
+            if(f!==undefined)
+            this.jQobj.parent("*").animate({ top:(y*30+8 ).toString()+"px",left:(x*30+10).toString()+"px"},t||200,"linear",f);else{
+                this.jQobj.parent("*").animate({ top:(y*30+8 ).toString()+"px",left:(x*30+10).toString()+"px"},t||200,"linear");
+            }
+        }else{
+            this.jQobj.parent("*").css("left",(x*30+10).toString()+"px");
+            this.jQobj.parent("*").css("top",(y*30+8).toString()+"px");
+        }
+    };
+}
+var enemies = [];
+var spx = 4;
+var spy = 173;
+function updateScore(){
+    $("#0A0 p").html(score.toString());
+}
+function getRekt(){
+    updateScore();
+    var highestTimeoutId = setTimeout(";");
+    for (var i = 0 ; i < highestTimeoutId ; i++) {
+        clearTimeout(i); 
+    }
+    $("*").clearQueue().stop();
+    
+}
+function Ghost(x,y,color,d){
+    this.X = x;
+    this.Y = y;
+    this.derpiness = d;
+    this.isDead = false;
+    switch(color){
+            case'red':
+            spx=4;
+            spy=173;
+            break;
+            case'pink':
+            spx=4;
+            spy=221;
+            break;
+            case'orange':
+            spx=4;
+            spy=245;
+            break;
+            case'cyan':
+            spx=196;
+            spy=221;
+            break;
+    }
+    this.startx=spx;
+    this.starty=spy;
+    this.sprite = new Sprite(spx,spy,24);
+    this.updateDirection = function(i){
+        this.sprite.y = isHigh?149:this.starty;
+        this.sprite.x = (isHigh?292:(this.startx+48*(3-i)));
+        if(this.isDead){
+            this.sprite.y = 245;
+            this.sprite.x = 196+(48*(3-i));
+        }
+        this.sprite.updateState();
+    };
+    var Gtests = [false,false,false,false,false];
+    var pdirs = [];
+    var coastD = 3;
+    this.move = function(i){
+        switch(i){
+                case 0:
+                this.Y--;
+                break;
+                case 1:
+                this.X--;
+                break;
+                case 2:
+                this.Y++;
+                break;
+                case 3:
+                this.X++;
+                break;
+        }
+        
+        if(this.X===27){
+            this.X=0;
+            playerSprite.movTo(this.X,this.Y,false);
+        }else if(this.X===0){
+            this.X=27;
+            playerSprite.movTo(this.X,this.Y,false);
+        }
+        this.sprite.jQobj.parent("*").finish();
+        this.sprite.movTo(this.X,this.Y,true,this.update.bind(this),isHigh?(this.isDead?20:500):200);
+        this.updateDirection(i);
+    }
+    this.update = function(){
+        Gtests = [false,false,false,false,false];
+        
+        if(board[this.Y-1][this.X] !== undefined)
+        if(board[this.Y-1][this.X].type>0)Gtests[0]=true;
+        if(board[this.Y][this.X-1] !== undefined)
+        if(board[this.Y][this.X-1].type>0)Gtests[1]=true;
+        if(board[this.Y+1][this.X] !== undefined)
+        if(board[this.Y+1][this.X].type>0)Gtests[2]=true;
+        if(board[this.Y][this.X+1] !== undefined)
+        if(board[this.Y][this.X+1].type>0)Gtests[3]=true;
+        dX = playerX-this.X;
+        dY = playerY-this.Y;
+        if(this.X===12&&this.Y===13){
+            this.isDead = false;
+        }
+        var Coast = true;
+        for(var key = 0; key<=3;key++)if(Gtests[key]&&(!(key===coastD||key===(coastD+2)%4)))Coast=false;
+        if(!Coast)Gtests[(coastD+2)%4]=false;
+        for(var key = 0; key<=3;key++)if(Gtests[key])pdirs.push(key);
+        if(Coast){
+            this.move(coastD);
+        }else{
+            dX = playerX-this.X;
+            dY = playerY-this.Y;
+            if(this.isDead){
+                dX = 12-this.X;
+                dY = 13-this.Y;
+            }else if(isHigh){
+                dX*=-1;
+                dY*=-1;
+            }
+            var helpfulness = [-dY,-dX,dY,dX];
+            var helpfulhelpfulness = []
+            for(var a =0;a<pdirs.length;a++){
+                helpfulhelpfulness.push(helpfulness[pdirs[a]]);
+            }
+            var D = pdirs[(Math.random()<(this.isDead?0.8:this.derpiness))?greatestElement(helpfulhelpfulness):Math.floor(Math.random()*pdirs.length)];
+            this.move(D);
+            coastD = D;
+        }
+        pdirs=[];
+        helpfulhelpfulness = [];
+    }
+    this.update();
+    this.collide = function(){
+        
+         var   dX = playerX-this.X;
+         var   dY = playerY-this.Y;
+        if(Math.abs(dX)<=0.5&&Math.abs(dY)<=0.5&&(!this.isDead)){
+            if(!isHigh){
+                setTimeout(getRekt,200);
+                return;
+            }else{
+                score+=1000;
+                this.isDead = true;
+            }
+        }
+        setTimeout(this.collide.bind(this),50);
+    };
+    this.collide();
+}
+var val = 0;
+var index = 10;
+function greatestElement(arr){
+    val = 0;
+    index = 10;
+    for(var i = 0;i<arr.length;i++){
+        if(arr[i]>val){
+            val = arr[i];
+            index = i;
+        }
+    }
+    return index;
+}
+var playerSprite;   
+var playerX= 0;
+var playerY= 14;
+var playerD= 4;
+var tests = [false,false,false,false,false];
+var playermove = function(i){
+        switch(i){
+                case 0:
+                playerY--;
+                playerSprite.y = 111;
+                playerSprite.x = 314;
+                break;
+                case 1:
+                playerX--;
+                playerSprite.y = 111;
+                playerSprite.x = 292;
+                break;
+                case 2:
+                playerY++;
+                playerSprite.y = 173;
+                playerSprite.x = 314;
+                break;
+                case 3:
+                playerX++;
+                playerSprite.y = 173;
+                playerSprite.x = 292;
+                break;
+        }
+        playerD=i;
+        playerSprite.t=48;
+        if(playerX===27){
+            playerX=0;
+            playerSprite.movTo(playerX,playerY,false);
+        }else
+        if(playerX===0){
+            playerX=27;
+            playerSprite.movTo(playerX,playerY,false);
+        }
+        playerSprite.updateState();
+        
+        if(!(keyStates[0]||keyStates[1]||keyStates[2]||keyStates[3])){
+            playerSprite.jQobj.parent("*").clearQueue();
+        }
+        playerSprite.jQobj.parent("*").finish();
+        playerSprite.movTo(playerX,playerY,true,update);
+        if(board[playerY][playerX].type===2){
+            score+=100;
+            var thisMint = $("#"+playerX+"A"+playerY);
+            setTimeout(thisMint.removeClass.bind(thisMint),150,"altoid");
+            setTimeout(thisMint.addClass.bind(thisMint),150,"blankSpace");
+            mintCount--;
+            if(mintCount===0){
+                getRekt();
+            }
+            board[playerY][playerX].type=1;
+        }
+        if(board[playerY][playerX].type===3){
+            score+=300;
+            isHigh = true;
+            var handle;
+            clearTimeout(handle);
+            handle = setTimeout(function(){isHigh = false;},10000)
+            var thisMint = $("#"+playerX+"A"+playerY);
+            setTimeout(thisMint.removeClass.bind(thisMint),150,"megaaltoid");
+            setTimeout(thisMint.addClass.bind(thisMint),150,"blankSpace");
+            board[playerY][playerX].type=1;
+        }
+    updateScore();
+        return;
+};
+function update(){
+    tests=[false,false,false,false,false];
+    if(board[playerY-1][playerX] !== undefined)
+    if(board[playerY-1][playerX].type>0)tests[0]=true;
+    if(board[playerY][playerX-1] !== undefined)
+    if(board[playerY][playerX-1].type>0)tests[1]=true;
+    if(board[playerY+1][playerX] !== undefined)
+    if(board[playerY+1][playerX].type>0)tests[2]=true;
+    if(board[playerY][playerX+1] !== undefined)
+    if(board[playerY][playerX+1].type>0)tests[3]=true;
+    var keysD=4;
+    for(var a=0;a<=3;a++)if(tests[a]&&keyStates[a])keysD=a;
+    if(keysD===4){
+        //coasting code
+        if(tests[playerD]){
+            playermove(playerD);
+            return;
+        }
+    }else{
+        playermove(keysD);
+        return;
+    }
+    playerSprite.t=0;
+    setTimeout(update.bind(this),180);
+    
+}
+function drawBoard(){
+    var b = $("body");
+    b.empty();
+    
+    for(var x = 0; x<31;x++)
+    
+    {
+        for(var y = 0; y<28; y++)
+        {
+            switch(board[x][y].type)
+            
+            {
+                    case 0:
+                        b.append("<div id=\""+y.toString()+"A"+x.toString()+"\" class=\"wall\"></div>");
+                        break;
+                    case 2:
+                        b.append("<div id=\""+y.toString()+"A"+x.toString()+"\" class=\"altoid\"></div>");
+                        break;
+                    case 3:
+                        b.append("<div id=\""+y.toString()+"A"+x.toString()+"\" class=\"megaaltoid\"></div>");
+                        break;
+                    default:
+                        b.append("<div id=\""+y.toString()+"A"+x.toString()+"\" class=\"blankSpace\"></div>");
+                        break;
+            }
+        }
+        b.append("<br/>");
+    }
+    
+};
+var init = function(){
+	$(document).keydown(function(key){
+        switch(parseInt(key.which)){
+                case 65: //a
+                    keyStates[1] = true;
+                    break;
+                case 87: //w
+                    keyStates[0] = true;
+                    
+                    break;
+                case 83: //s
+                    keyStates[2] = true;
+                    break;
+                case 68: //d
+                    keyStates[3] = true;
+                    break;
+                }
+    });
+	$(document).keyup(function(key){
+        switch(parseInt(key.which)){
+                case 65: //a
+                    keyStates[1] = false;
+                    break;
+                case 87: //w
+                    keyStates[0] = false;
+                    
+                    break;
+                case 83: //s
+                    keyStates[2] = false;
+                    break;
+                case 68: //d
+                
+                    keyStates[3] = false;
+                    break;
+                case 69: //e
+                    
+                    confirm(keyStates);
+                    break;
+                }
+    });
+    drawBoard();
+    playerSprite = new Sprite(4,196,0);
+    playerSprite.movTo(playerX,playerY,false);
+    for(var i = 0;i<=3;i++){
+        switch(/*Math.floor(Math.random()*4)){*/i){
+                case 0:
+                enemies.push(new Ghost(11,13,'cyan',1));
+                break;
+                case 1:
+                enemies.push(new Ghost(13,13,'red',0.5));
+                break;
+                case 2:
+                enemies.push(new Ghost(11,13,'pink',0.3));
+                break;
+                case 3:
+                enemies.push(new Ghost(12,13,'orange',0.0));
+                break;
+        }
+    }
+    $("#0A0").append("<p style = \"position:absolute;left:10px;margin:0px 0px 0px 0px;top:0px;color:white;font-size:40px\">"+score+"</p>");
+    update();
+    
+}
+$(document).ready(init);
+    	</script>
+    </head>
+    <body style="background-color:black">
+    <div style="background-color:blue;height:100;wiabsolutedth:100"></div>
+    <div style="position:absolute;width:22px;height:22px;overflow:hidden">
+        <img src="Sprites/pacmanthumb.png" style="position:absolute;left:-292px;top:-173px"></img>
+    </div>
+    
+    </body>
+</html>

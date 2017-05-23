@@ -1,0 +1,37 @@
+.wall {
+    background-color:RGB(0,0,255);
+    height:30px;
+    width:30px;
+    display:inline-block;
+    margin:-2px 0px -2px 0px;
+    padding:0px 0px 0px 0px;
+}
+
+.altoid {
+    background-color:white;
+    height:10px;
+    width:10px;
+    display:inline-block;
+    margin:8px 10px 8px 10px;
+    border-radius:100%;
+    padding:0px 0px 0px 0px'
+}
+
+.blankSpace {
+    
+    background-color:RGB(0,0,0);
+    height:30px;
+    width:30px;
+    display:inline-block;
+    margin:-2px 0px -2px 0px;
+    padding:0px 0px 0px 0px;
+}
+.megaaltoid {
+    background-color:white;
+    height:16px;
+    width:16px;
+    display:inline-block;
+    margin:5px 7px 5px 7px;
+    border-radius:100%;
+    padding:0px 0px 0px 0px'
+}
