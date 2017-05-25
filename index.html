@@ -26,7 +26,7 @@ var defboard = [
 [-1,-1,-1,-1,-1, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0,-1,-1,-1,-1,-1],
 [-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
 [-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 0, 0, 0, 1,-1, 0, 0, 0, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
-[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 4, 4, 4,-1,-1,-1, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+[ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 4, 4, 4, 4,-1,-1, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
 [ 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0,-1,-1,-1,-1,-1,-1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1],
 [ 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0,-1,-1,-1,-1,-1,-1, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0],
 [-1,-1,-1,-1,-1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0,-1,-1,-1,-1,-1],
@@ -130,6 +130,7 @@ function Ghost(x,y,color,d){
     this.startx=spx;
     this.starty=spy;
     this.sprite = new Sprite(spx,spy,24);
+   this.sprite.movTo(this.X,this.Y,false)
     this.updateDirection = function(i){
         this.sprite.y = isHigh?149:this.starty;
         this.sprite.x = (isHigh?292:(this.startx+48*(3-i)));
@@ -157,21 +158,20 @@ function Ghost(x,y,color,d){
                 this.X++;
                 break;
         }
+        this.sprite.jQobj.parent("*").finish();
         
         if(this.X===27){
             this.X=0;
-            playerSprite.movTo(this.X,this.Y,false);
+            this.sprite.movTo(this.X-1,this.Y,false);
         }else if(this.X===0){
             this.X=27;
-            playerSprite.movTo(this.X,this.Y,false);
+            this.sprite.movTo(this.X+1,this.Y,false);
         }
-        this.sprite.jQobj.parent("*").finish();
         this.sprite.movTo(this.X,this.Y,true,this.update.bind(this),isHigh?(this.isDead?20:500):200);
         this.updateDirection(i);
     }
     this.update = function(){
         Gtests = [false,false,false,false,false];
-        
         if(board[this.Y-1][this.X] !== undefined)
         if(board[this.Y-1][this.X].type>0)Gtests[0]=true;
         if(board[this.Y][this.X-1] !== undefined)
@@ -180,11 +180,19 @@ function Ghost(x,y,color,d){
         if(board[this.Y+1][this.X].type>0)Gtests[2]=true;
         if(board[this.Y][this.X+1] !== undefined)
         if(board[this.Y][this.X+1].type>0)Gtests[3]=true;
-        dX = playerX-this.X;
-        dY = playerY-this.Y;
-        if(this.X===12&&this.Y===13){
+       
+        if(this.X===13&&this.Y===13){
             this.isDead = false;
         }
+       if(board[this.Y][this.X].type===4){
+          if(this.X>13)this.move(1)
+          else if(this.X<13)this.move(3)
+          else this.move(0);
+          coastD = 0;
+       }     
+       else{
+        dX = playerX-this.X;
+        dY = playerY-this.Y;
         var Coast = true;
         for(var key = 0; key<=3;key++)if(Gtests[key]&&(!(key===coastD||key===(coastD+2)%4)))Coast=false;
         if(!Coast)Gtests[(coastD+2)%4]=false;
@@ -209,7 +217,7 @@ function Ghost(x,y,color,d){
             var D = pdirs[(Math.random()<(this.isDead?0.8:this.derpiness))?greatestElement(helpfulhelpfulness):Math.floor(Math.random()*pdirs.length)];
             this.move(D);
             coastD = D;
-        }
+        }}
         pdirs=[];
         helpfulhelpfulness = [];
     }
@@ -422,7 +430,7 @@ var init = function(){
                 enemies.push(new Ghost(13,13,'red',0.5));
                 break;
                 case 2:
-                enemies.push(new Ghost(11,13,'pink',0.3));
+                enemies.push(new Ghost(14,13,'pink',0.3));
                 break;
                 case 3:
                 enemies.push(new Ghost(12,13,'orange',0.0));
@@ -441,6 +449,6 @@ $(document).ready(init);
     <div style="position:absolute;width:22px;height:22px;overflow:hidden">
         <img src="Sprites/pacmanthumb.png" style="position:absolute;left:-292px;top:-173px"></img>
     </div>
-    
+   <div></div>
     </body>
 </html>
