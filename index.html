@@ -3,7 +3,7 @@
 	<head>
         <title>PacMan</title>
         <link rel="stylesheet" type="text/css" href="css/default.css">
-    	<script src="jquery.min.js"></script>
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     	<script>
 /*0 - wall
   1 - space
@@ -376,9 +376,11 @@ function drawBoard(){
         }
         b.append("<br/>");
     }
-    
+    //b.append("<div class='joystick'><div class='joystickHandle'></div></div>");
 };
 var init = function(){
+    drawBoard();
+    $("#0A0").append("<p style = \"position:absolute;left:10px;margin:0px 0px 0px 0px;top:0px;color:white;font-size:40px\">"+score+"</p> <div class='joystick'><div class='joystickHandle'></div></div>");
 	$(document).keydown(function(key){
         switch(parseInt(key.which)){
                 case 65: //a
@@ -418,7 +420,26 @@ var init = function(){
                     break;
                 }
     });
-    drawBoard();
+    $(".joystickHandle")[0].addEventListener("touchmove",function(evt){
+        X=evt.targetTouches.item(0).pageX;
+        Y=evt.targetTouches.item(0).pageY;
+        X=X-925;
+        Y=Y-81;
+        $(this).css("left",Math.floor(X+25).toString()+"px").css("top",Math.floor(Y+25).toString()+"px");
+        if(Y>X){
+            if(Y>-X){
+                keyStates = [false,false,true,false,false];
+            }else{
+                keyStates = [false,true,false,false,false];
+            }
+        }else{
+            if(Y>-X){
+                keyStates = [false,false,false,true,false];
+            }else{
+                keyStates = [true,false,false,false,false];
+            }         
+        }
+    })
     playerSprite = new Sprite(4,196,0);
     playerSprite.movTo(playerX,playerY,false);
     for(var i = 0;i<=3;i++){
@@ -437,7 +458,6 @@ var init = function(){
                 break;
         }
     }
-    $("#0A0").append("<p style = \"position:absolute;left:10px;margin:0px 0px 0px 0px;top:0px;color:white;font-size:40px\">"+score+"</p>");
     update();
     
 }
@@ -449,6 +469,6 @@ $(document).ready(init);
     <div style="position:absolute;width:22px;height:22px;overflow:hidden">
         <img src="Sprites/pacmanthumb.png" style="position:absolute;left:-292px;top:-173px"></img>
     </div>
-   <div></div>
+    <div class="joystick"><div class="joystickHandle"></div></div>
     </body>
 </html>

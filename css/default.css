@@ -35,3 +35,22 @@
     border-radius:100%;
     padding:0px 0px 0px 0px'
 }
+.joystick {
+    background-color:gray;
+    height:150px;
+    width:150px;
+    position:absolute;
+    border-radius:100%;
+    left: 850px;
+    padding:0px 0px 0px 0px'
+}
+.joystickHandle {
+    background-color:red;
+    height:100px;
+    width:100px;
+    position: relative;
+    left:25px;
+    top: 25px;
+    border-radius:100%;
+    padding:0px 0px 0px 0px'
+}
