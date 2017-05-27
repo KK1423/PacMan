@@ -425,7 +425,9 @@ var init = function(){
         Y=evt.targetTouches.item(0).pageY;
         X=X-925;
         Y=Y-81;
-        $(this).css("left",Math.floor(X+25).toString()+"px").css("top",Math.floor(Y+25).toString()+"px");
+        r=75/Math.pow(X*X+Y*Y,1/2)
+        r=Math.min(r,1)
+        $(this).css("left",Math.floor(X*r+25).toString()+"px").css("top",Math.floor(Y*r+25).toString()+"px");
         if(Y>X){
             if(Y>-X){
                 keyStates = [false,false,true,false,false];
@@ -439,6 +441,8 @@ var init = function(){
                 keyStates = [true,false,false,false,false];
             }         
         }
+        evt.preventDefault()
+        return false;
     })
     playerSprite = new Sprite(4,196,0);
     playerSprite.movTo(playerX,playerY,false);
