@@ -48,7 +48,6 @@
         /*W,A,S,D*/
         var keyStates = [false, false, false, false];
         var score = 0;
-        var isHigh = false;
         function Tile(n) {
             this.type = n;
         }
@@ -94,7 +93,7 @@
         var spx = 4;
         var spy = 173;
         function updateScore() {
-            $("#0A0 p").html(score.toString());
+            $("body p").html(score.toString());
         }
         function getRekt() {
             updateScore();
@@ -103,6 +102,21 @@
                 clearTimeout(i);
             }
             $("*").clearQueue().stop();
+            playerSprite.jQobj.attr("src", "");
+            location.reload();
+        }
+        function win() {
+            var highestTimeoutId = setTimeout(";");
+            for (var i = 0; i < highestTimeoutId; i++) {
+                clearTimeout(i);
+            }
+            for (i = 0; i < enemies.length; i++) {
+                enemies[i].sprite.jQobj.remove();
+            }
+            $("*").clearQueue().stop();
+            s = $("body p");
+            s.html(s.html() + " You Win!");
+
 
         }
         function Ghost(x, y, color, d) {
@@ -110,6 +124,7 @@
             this.Y = y;
             this.derpiness = d;
             this.isDead = false;
+            this.isHigh = false;
             switch (color) {
                 case 'red':
                     spx = 4;
@@ -133,8 +148,8 @@
             this.sprite = new Sprite(spx, spy, 24);
             this.sprite.movTo(this.X, this.Y, false)
             this.updateDirection = function (i) {
-                this.sprite.y = isHigh ? 149 : this.starty;
-                this.sprite.x = (isHigh ? 292 : (this.startx + 48 * (3 - i)));
+                this.sprite.y = this.isHigh ? 149 : this.starty;
+                this.sprite.x = (this.isHigh ? 292 : (this.startx + 48 * (3 - i)));
                 if (this.isDead) {
                     this.sprite.y = 245;
                     this.sprite.x = 196 + (48 * (3 - i));
@@ -168,7 +183,7 @@
                     this.X = 27;
                     this.sprite.movTo(this.X + 1, this.Y, false);
                 }
-                this.sprite.movTo(this.X, this.Y, true, this.update.bind(this), isHigh ? (this.isDead ? 20 : 500) : 200);
+                this.sprite.movTo(this.X, this.Y, true, this.update.bind(this), this.isHigh ? (this.isDead ? 20 : 500) : 200);
                 this.updateDirection(i);
             }
             this.update = function () {
@@ -184,6 +199,7 @@
 
                 if (this.X === 13 && this.Y === 13) {
                     this.isDead = false;
+                    this.isHigh = false;
                 }
                 if (board[this.Y][this.X].type === 4) {
                     if (this.X > 13) this.move(1)
@@ -206,7 +222,7 @@
                         if (this.isDead) {
                             dX = 12 - this.X;
                             dY = 13 - this.Y;
-                        } else if (isHigh) {
+                        } else if (this.isHigh) {
                             dX *= -1;
                             dY *= -1;
                         }
@@ -229,7 +245,7 @@
                 var dX = playerX - this.X;
                 var dY = playerY - this.Y;
                 if (Math.abs(dX) <= 0.5 && Math.abs(dY) <= 0.5 && (!this.isDead)) {
-                    if (!isHigh) {
+                    if (!this.isHigh) {
                         setTimeout(getRekt, 200);
                         return;
                     } else {
@@ -259,6 +275,7 @@
         var playerY = 14;
         var playerD = 4;
         var tests = [false, false, false, false, false];
+        var handle;
         var playermove = function (i) {
             switch (i) {
                 case 0:
@@ -306,16 +323,22 @@
                 setTimeout(thisMint.addClass.bind(thisMint), 150, "blankSpace");
                 mintCount--;
                 if (mintCount === 0) {
-                    getRekt();
+                    win();
                 }
                 board[playerY][playerX].type = 1;
             }
             if (board[playerY][playerX].type === 3) {
                 score += 300;
-                isHigh = true;
-                var handle;
+                for (var i = 0; i < enemies.length; i++) {
+                    enemies[i].isHigh = true;
+                }
                 clearTimeout(handle);
-                handle = setTimeout(function () { isHigh = false; }, 10000)
+                handle = setTimeout(function () {
+                    for (var i = 0; i < enemies.length; i++) {
+                        enemies[i].isHigh = false;
+                        enemies[i].isDead = false;
+                    }
+                }, 10000)
                 var thisMint = $("#" + playerX + "A" + playerY);
                 setTimeout(thisMint.removeClass.bind(thisMint), 150, "megaaltoid");
                 setTimeout(thisMint.addClass.bind(thisMint), 150, "blankSpace");
